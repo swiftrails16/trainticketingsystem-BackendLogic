@@ -1,5 +1,8 @@
 package com.swiftrails.SWIFTRAILS.dto;
 
+import jakarta.persistence.Entity;
+
+@Entity
 public class UserResponse  {
     
     private String name;

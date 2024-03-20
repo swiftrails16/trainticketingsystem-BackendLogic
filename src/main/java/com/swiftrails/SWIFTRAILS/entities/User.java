@@ -7,12 +7,30 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	private String fname;
+	private String lname;
+	private String password;
+
+	@Column(unique = true)
+	private String email;
+	private String address;
+	private String phone_number;
+	private String otp;
+//	private int otpRetryCount;
+//	private LocalDateTime lastOtpRequestTime;
+//	private LocalDateTime generatedAt;
 
 	public String getFname() {
 		return fname;
@@ -29,19 +47,7 @@ public class User {
 	public void setLname(String lname) {
 		this.lname = lname;
 	}
-
-	private String fname;
-	private String lname;
-	private String password;
-
-	@Column(unique = true)
-	private String email;
-	private String address;
-	private String phone_number;
-	private int otpRetryCount;
-	private LocalDateTime lastOtpRequestTime;
-	private LocalDateTime generatedAt;
-
+	
 	public Long getId() {
 		return id;
 	}
@@ -82,28 +88,12 @@ public class User {
 		this.phone_number = phone_number;
 	}
 
-	public int getOtpRetryCount() {
-		return otpRetryCount;
+	public String getOtp() {
+		return otp;
 	}
 
-	public void setOtpRetryCount(int otpRetryCount) {
-		this.otpRetryCount = otpRetryCount;
-	}
-
-	public LocalDateTime getLastOtpRequestTime() {
-		return lastOtpRequestTime;
-	}
-
-	public void setLastOtpRequestTime(LocalDateTime lastOtpRequestTime) {
-		this.lastOtpRequestTime = lastOtpRequestTime;
-	}
-
-	public LocalDateTime getGeneratedAt() {
-		return generatedAt;
-	}
-
-	public void setGeneratedAt(LocalDateTime generatedAt) {
-		this.generatedAt = generatedAt;
+	public void setOtp(String otp) {
+		this.otp = otp;
 	}
 
 
