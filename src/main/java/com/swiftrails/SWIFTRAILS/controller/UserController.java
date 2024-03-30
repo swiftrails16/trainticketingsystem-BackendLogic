@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.swiftrails.SWIFTRAILS.entities.User;
+import com.swiftrails.SWIFTRAILS.impl.TrainsSceduleAPIServiceImpl;
 import com.swiftrails.SWIFTRAILS.impl.UserServiceImpl;
 import com.swiftrails.SWIFTRAILS.services.UserService;
 
@@ -27,6 +28,9 @@ public class UserController {
 	
 	@Autowired
 	public UserServiceImpl userservice;
+	
+	@Autowired
+	public TrainsSceduleAPIServiceImpl trainssceduleapiserviceimpl;
 	
 	@PostMapping("/registerUser")
 	public ResponseEntity<String>  registerUser(@RequestBody User user) {
@@ -57,6 +61,13 @@ public class UserController {
 	    String email = request.get("email");
 	    String res = userservice.deleteUser(email);
 	    return ResponseEntity.ok(res);
+	}
+	
+	@PostMapping("/stationCodes")
+	public String fetchTrainStationsCodes() {
+		String stationCodes = trainssceduleapiserviceimpl.fetchTrainStationsCodes(); 
+		
+		return stationCodes;
 	}
 	
 //	@PostMapping("/login")
