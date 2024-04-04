@@ -60,8 +60,10 @@ public class UserController {
 	}
 	
 	@GetMapping("/stationCodes")
-	public String fetchTrainStationsCodes() {
-		String stationCodes = trainssceduleapiserviceimpl.fetchTrainStationsCodes(); 
+	public String fetchTrainStationsCodes(@RequestParam String fromStationCode,
+								            @RequestParam String toStationCode,
+								            @RequestParam String dateOfJourney) {
+		String stationCodes = trainssceduleapiserviceimpl.fetchTrainStationsCodes(fromStationCode, toStationCode, dateOfJourney); 
 		
 		return stationCodes;
 	}
