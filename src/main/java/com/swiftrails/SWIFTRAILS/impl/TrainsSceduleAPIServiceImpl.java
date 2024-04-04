@@ -15,41 +15,21 @@ public class TrainsSceduleAPIServiceImpl implements TrainsSceduleAPIService{
 
 	@Override
 	public String fetchTrainStationsCodes() {
-//		HttpRequest request = HttpRequest.newBuilder()
-//				.uri(URI.create("https://api.publicapis.org/entries"))
-////				.header("X-RapidAPI-Key", "c2fe9ef819msh6986a34c65d1874p1d8758jsn3f0df5ea548a")
-////				.header("X-RapidAPI-Host", "community-nyc-subway-data.p.rapidapi.com")
-//				
-//				.method("GET", HttpRequest.BodyPublishers.noBody())
-//				.build();
-//		HttpResponse<String> response = null;
-//		try {
-//			response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		return response.body();
 		
+		// Construct the URL with query parameters
 		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create("https://trains.p.rapidapi.com/"))
-				.header("content-type", "application/json")
-				.header("X-RapidAPI-Key", "c2fe9ef819msh6986a34c65d1874p1d8758jsn3f0df5ea548a")
-				.header("X-RapidAPI-Host", "trains.p.rapidapi.com")
-				.method("POST", HttpRequest.BodyPublishers.ofString("{\r\n    \"search\": \"Rajdhani\"\r\n}"))
+				.uri(URI.create("https://irctc1.p.rapidapi.com/api/v3/trainBetweenStations?fromStationCode=BVI&toStationCode=NDLS&dateOfJourney=2024-01-17"))
+				.header("X-RapidAPI-Key", "aba3dfb600msh213cb11198aac29p1bd178jsnc7d2c0cb7589")
+				.header("X-RapidAPI-Host", "irctc1.p.rapidapi.com")
+				.method("GET", HttpRequest.BodyPublishers.noBody())
 				.build();
 		HttpResponse<String> response = null;
 		try {
 			response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("IOException: " + e);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("InterruptedException: " + e);
 		}
 		return response.body();
 	
