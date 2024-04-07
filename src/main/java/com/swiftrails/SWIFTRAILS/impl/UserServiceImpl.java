@@ -160,6 +160,35 @@ public class UserServiceImpl implements UserService {
 		}
 		return result;
 	}
+	
+	@Override
+	public String updateUser(String email, String password, String firstName, String lastName, String address, String phoneNumber) {
+	    String result;
+	    String query = "UPDATE CUSTOMER SET PWORD = ?, FNAME = ?, LNAME = ?, ADDR = ?, PHNO = ? WHERE MAILID = ?";
+	    try {
+	        Connection con = dbconnection.getConnection();
+	        PreparedStatement ps = con.prepareStatement(query);
+	        ps.setString(1, password);
+	        ps.setString(2, firstName);
+	        ps.setString(3, lastName);
+	        ps.setString(4, address);
+	        ps.setString(5, phoneNumber);
+	        ps.setString(6, email);
+	        int rowsAffected = ps.executeUpdate();
+	        System.out.println("Updated rows affected: " + rowsAffected);
+	        if (rowsAffected > 0) {
+	            result = "User Updated Successfully";
+	        } else {
+	            result = "No user found with the provided email, or user could not be updated.";
+	        }
+	    } catch (SQLException e) {
+	        // Log the exception details here instead of printStackTrace
+	        e.printStackTrace();
+	        result = "SQLException occurred: " + e.getMessage();
+	    }
+	    return result;
+	}
+
 
 	@Override
 	public String deleteUser(String email) {

@@ -1,8 +1,6 @@
 package com.swiftrails.SWIFTRAILS.controller;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 import javax.mail.MessagingException;
 
@@ -28,11 +26,10 @@ import com.swiftrails.SWIFTRAILS.impl.BookingServiceImpl;
 import com.swiftrails.SWIFTRAILS.impl.StationServiceImpl;
 import com.swiftrails.SWIFTRAILS.dto.TaxResponse;
 
-
 @RestController
 @CrossOrigin(origins = "http://localhost:8080")
 public class UserController {
-	
+
 	@Autowired
 	public UserServiceImpl userservice;
 	@Autowired
@@ -41,85 +38,92 @@ public class UserController {
 	public StationServiceImpl stationservice;
 	@Autowired
 	public EmailSenderService emailsenderservice;
-	
-	
+
 	@Autowired
 	public TrainsSceduleAPIServiceImpl trainssceduleapiserviceimpl;
-	
-	
+
 	@GetMapping("/")
 	public ResponseEntity<String> visited() {
 		return ResponseEntity.ok("hi");
 	}
-	
+
 	@PostMapping("/registerUser")
 	public ResponseEntity<String> registerUser(@RequestBody User user) {
-		String res=userservice.registerUser(user);
+		String res = userservice.registerUser(user);
 		return ResponseEntity.ok(res);
 	}
-	
+
 	@PostMapping("/findEmail")
-    public User findEmail(@RequestParam String email) {
-        User u=userservice.findByEmail(email);
-        return u;
-    }
-	
+	public User findEmail(@RequestParam String email) {
+		User u = userservice.findByEmail(email);
+		return u;
+	}
+
 	@PutMapping("/validateOTP")
-	public ResponseEntity<String> validateOTP(@RequestBody User user){
-		String email= user.getEmail();
-		String otp=user.getOtp();
+	public ResponseEntity<String> validateOTP(@RequestBody User user) {
+		String email = user.getEmail();
+		String otp = user.getOtp();
 		try {
-			String result=userservice.validateUser(email,otp);
+			String result = userservice.validateUser(email, otp);
 			return ResponseEntity.ok(result);
-		}catch(Exception e){
+		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
 		}
 	}
+
 	@DeleteMapping("/deleteUser")
-	public ResponseEntity<String> deleteUser(@RequestBody Map<String, String> request){
-	    String email = request.get("email");
-	    String res = userservice.deleteUser(email);
-	    return ResponseEntity.ok(res);
+	public ResponseEntity<String> deleteUser(@RequestParam String email) {
+		String res = userservice.deleteUser(email);
+		return ResponseEntity.ok(res);
 	}
-	
+
+	@PutMapping("/updateUser")
+	public ResponseEntity<String> updateUser(@RequestParam String email, @RequestParam String password,
+			@RequestParam String firstName, @RequestParam String lastName, @RequestParam String address,
+			@RequestParam String phoneNumber) {
+		String res = userservice.updateUser(email, password, firstName, lastName, address, phoneNumber);
+		return ResponseEntity.ok(res);
+	}
+
 	@GetMapping("/stationCodes")
-	public String fetchTrainStationsCodes(@RequestParam String fromStationCode,
-								            @RequestParam String toStationCode,
-								            @RequestParam String dateOfJourney) {
-		String stationCodes = trainssceduleapiserviceimpl.fetchTrainStationsCodes(fromStationCode, toStationCode, dateOfJourney); 
-		
+	public String fetchTrainStationsCodes(@RequestParam String fromStationCode, @RequestParam String toStationCode,
+			@RequestParam String dateOfJourney) {
+		String stationCodes = trainssceduleapiserviceimpl.fetchTrainStationsCodes(fromStationCode, toStationCode,
+				dateOfJourney);
+
 		return stationCodes;
 	}
-	
-	
+
 	@PostMapping("/getRoutes")
 	public List<Stations> fetchAllRoutes() {
-		List<Stations>routes = stationservice.getAllStations();
+		List<Stations> routes = stationservice.getAllStations();
 		return routes;
 	}
-	
+
 	@PostMapping("/bookTicket")
-	public String bookTicket(@RequestParam String userEmail,@RequestParam String origin,@RequestParam String destination,@RequestParam String startDate,@RequestParam String returnDate,@RequestParam String DiscountType,@RequestParam String DiscountCode) {
+	public String bookTicket(@RequestParam String userEmail, @RequestParam String origin,
+			@RequestParam String destination, @RequestParam String startDate, @RequestParam String returnDate,
+			@RequestParam String DiscountType, @RequestParam String DiscountCode) {
 		System.out.println("started");
 		Stations route1 = stationservice.Getbyorg_dest(origin, destination);
-		Stations route2 = stationservice.Getbyorg_dest(destination,origin);
-		
+		Stations route2 = stationservice.Getbyorg_dest(destination, origin);
+
 		int price = 0;
 		int tax = 0;
-		
-		if(route1 == null && route2 == null) {
+
+		if (route1 == null && route2 == null) {
 			return "Failed to add booking 1";
 		}
-		if(route1 == null) {
+		if (route1 == null) {
 			return "Failed to add booking 2";
 		}
 		price += route1.getPrice();
-		tax+= route1.getTax();
-		if(route2 != null) {
+		tax += route1.getTax();
+		if (route2 != null) {
 			price += route2.getPrice();
-			tax+= route2.getTax();
+			tax += route2.getTax();
 		}
-		Booking booking  = new Booking();
+		Booking booking = new Booking();
 		booking.setUserEmail(userEmail);
 		booking.setOrigin(origin);
 		booking.setDestination(destination);
@@ -127,11 +131,11 @@ public class UserController {
 		booking.setFroDate(returnDate);
 		booking.setPrice(price);
 		booking.setTax(tax);
-		
+
 		String s = bookingservice.addBooking(booking);
-		
+
 		return s;
-		
+
 	}
 
 	@PostMapping("/CancelTicket")
@@ -140,9 +144,11 @@ public class UserController {
 		String userEmail = booking.getUserEmail();
 		User user = userservice.findByEmail(userEmail);
 		System.out.println(userEmail);
-		String text = "Dear "+user.getFname()+" "+user.getLname()+" , \n"+"Your Booking with BookingId " + booking.getId() + " has been Cancelled \n A refund of "+booking.getPrice()+" has been debited to your account with enging digits 1234";
+		String text = "Dear " + user.getFname() + " " + user.getLname() + " , \n" + "Your Booking with BookingId "
+				+ booking.getId() + " has been Cancelled \n A refund of " + booking.getPrice()
+				+ " has been debited to your account with enging digits 1234";
 		try {
-			emailsenderservice.sendEmail(userEmail,"Cancellation of SWIFTRAILS ticket", text);
+			emailsenderservice.sendEmail(userEmail, "Cancellation of SWIFTRAILS ticket", text);
 			return "Your booking has been succesfully cancelled";
 		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
@@ -150,20 +156,19 @@ public class UserController {
 			return "something went wrong";
 		}
 	}
-	
+
 	@PostMapping("/taxation")
-	public TaxResponse sendTaxes(@RequestParam int price){
-		
+	public TaxResponse sendTaxes(@RequestParam int price) {
+
 		TaxResponse res = new TaxResponse();
-		
+
 		res.salesTax = bookingservice.salesTax(price);
 		res.serviceTax = bookingservice.serviceTax(price);
-		res.totalPrice = price + res.salesTax+res.serviceTax;
-		
+		res.totalPrice = price + res.salesTax + res.serviceTax;
+
 		return res;
 	}
-	
-	
+
 //	@PostMapping("/login")
 //	public ResponseEntity<User> login(@RequestBody Map<String, String> request) {
 //	    String email = request.get("email");
@@ -176,7 +181,4 @@ public class UserController {
 //	    }
 //	}
 
-
-	
-	
 }
