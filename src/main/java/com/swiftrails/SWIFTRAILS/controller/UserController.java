@@ -1,6 +1,10 @@
 package com.swiftrails.SWIFTRAILS.controller;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+
+import javax.mail.MessagingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,8 +19,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.swiftrails.SWIFTRAILS.entities.User;
+import com.swiftrails.SWIFTRAILS.entities.Booking;
+import com.swiftrails.SWIFTRAILS.entities.Stations;
 import com.swiftrails.SWIFTRAILS.impl.TrainsSceduleAPIServiceImpl;
 import com.swiftrails.SWIFTRAILS.impl.UserServiceImpl;
+import com.swiftrails.SWIFTRAILS.services.EmailSenderService;
+import com.swiftrails.SWIFTRAILS.impl.BookingServiceImpl;
+import com.swiftrails.SWIFTRAILS.impl.StationServiceImpl;
+import com.swiftrails.SWIFTRAILS.dto.TaxResponse;
+
 
 @RestController
 @CrossOrigin(origins = "http://localhost:8080")
@@ -24,16 +35,28 @@ public class UserController {
 	
 	@Autowired
 	public UserServiceImpl userservice;
+	@Autowired
+	public BookingServiceImpl bookingservice;
+	@Autowired
+	public StationServiceImpl stationservice;
+	@Autowired
+	public EmailSenderService emailsenderservice;
+	
 	
 	@Autowired
 	public TrainsSceduleAPIServiceImpl trainssceduleapiserviceimpl;
 	
+	
+	@GetMapping("/")
+	public ResponseEntity<String> visited() {
+		return ResponseEntity.ok("hi");
+	}
+	
 	@PostMapping("/registerUser")
-	public ResponseEntity<String>  registerUser(@RequestBody User user) {
+	public ResponseEntity<String> registerUser(@RequestBody User user) {
 		String res=userservice.registerUser(user);
 		return ResponseEntity.ok(res);
 	}
-	
 	
 	@PostMapping("/findEmail")
     public User findEmail(@RequestParam String email) {
@@ -67,6 +90,79 @@ public class UserController {
 		
 		return stationCodes;
 	}
+	
+	
+	@PostMapping("/getRoutes")
+	public List<Stations> fetchAllRoutes() {
+		List<Stations>routes = stationservice.getAllStations();
+		return routes;
+	}
+	
+	@PostMapping("/bookTicket")
+	public String bookTicket(@RequestParam String userEmail,@RequestParam String origin,@RequestParam String destination,@RequestParam String startDate,@RequestParam String returnDate,@RequestParam String DiscountType,@RequestParam String DiscountCode) {
+		System.out.println("started");
+		Stations route1 = stationservice.Getbyorg_dest(origin, destination);
+		Stations route2 = stationservice.Getbyorg_dest(destination,origin);
+		
+		int price = 0;
+		int tax = 0;
+		
+		if(route1 == null && route2 == null) {
+			return "Failed to add booking 1";
+		}
+		if(route1 == null) {
+			return "Failed to add booking 2";
+		}
+		price += route1.getPrice();
+		tax+= route1.getTax();
+		if(route2 != null) {
+			price += route2.getPrice();
+			tax+= route2.getTax();
+		}
+		Booking booking  = new Booking();
+		booking.setUserEmail(userEmail);
+		booking.setOrigin(origin);
+		booking.setDestination(destination);
+		booking.setToDate(startDate);
+		booking.setFroDate(returnDate);
+		booking.setPrice(price);
+		booking.setTax(tax);
+		
+		String s = bookingservice.addBooking(booking);
+		
+		return s;
+		
+	}
+
+	@PostMapping("/CancelTicket")
+	public String CancelTicket(@RequestParam Long bookingId) {
+		Booking booking = bookingservice.cancelBooking(bookingId);
+		String userEmail = booking.getUserEmail();
+		User user = userservice.findByEmail(userEmail);
+		System.out.println(userEmail);
+		String text = "Dear "+user.getFname()+" "+user.getLname()+" , \n"+"Your Booking with BookingId " + booking.getId() + " has been Cancelled \n A refund of "+booking.getPrice()+" has been debited to your account with enging digits 1234";
+		try {
+			emailsenderservice.sendEmail(userEmail,"Cancellation of SWIFTRAILS ticket", text);
+			return "Your booking has been succesfully cancelled";
+		} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return "something went wrong";
+		}
+	}
+	
+	@PostMapping("/taxation")
+	public TaxResponse sendTaxes(@RequestParam int price){
+		
+		TaxResponse res = new TaxResponse();
+		
+		res.salesTax = bookingservice.salesTax(price);
+		res.serviceTax = bookingservice.serviceTax(price);
+		res.totalPrice = price + res.salesTax+res.serviceTax;
+		
+		return res;
+	}
+	
 	
 //	@PostMapping("/login")
 //	public ResponseEntity<User> login(@RequestBody Map<String, String> request) {
