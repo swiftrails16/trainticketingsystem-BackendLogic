@@ -39,6 +39,7 @@ public class UserServiceImpl implements UserService {
 				u.setFname(rs.getString("fname"));
 				u.setLname(rs.getString("lname"));
 				u.setAddress(rs.getString("addr"));
+				u.setPassword(rs.getString("pword"));
 				u.setEmail(rs.getString("mailid"));
 				u.setPhone_number(rs.getString("phno"));
 			} else {
@@ -55,7 +56,7 @@ public class UserServiceImpl implements UserService {
 	private EmailSenderService senderService;
 
 	@Override
-	public String registerUser(User user) {
+	public String registerUser(String email,String password,String firstName,String lastName,String address,String phoneNumber) {
 		String responseCode = null;
 		String query = "INSERT INTO customer VALUES(?,?,?,?,?,?,?,?)";
 
@@ -66,17 +67,28 @@ public class UserServiceImpl implements UserService {
 			String otp = getOTP();
 			boolean is_active = false;
 
-			System.out.println("This is the mail ID: " + user.getEmail());
-			ps.setString(1, user.getEmail());
-			ps.setString(2, user.getPassword());
-			ps.setString(3, user.getFname());
-			ps.setString(4, user.getLname());
-			ps.setString(5, user.getAddress());
-			ps.setString(6, user.getPhone_number());
+			System.out.println("This is the mail ID: " + email);
+//			ps.setString(1, user.getEmail());
+//			ps.setString(2, user.getPassword());
+//			ps.setString(3, user.getFname());
+//			ps.setString(4, user.getLname());
+//			ps.setString(5, user.getAddress());
+//			ps.setString(6, user.getPhone_number());
+//			ps.setString(7, otp);
+//			ps.setBoolean(8, is_active);
+//
+//			String mailId = user.getEmail();
+			ps.setString(1, email);
+			ps.setString(2, password);
+			ps.setString(3, firstName);
+			ps.setString(4, lastName);
+			ps.setString(5, address);
+			ps.setString(6,phoneNumber);
 			ps.setString(7, otp);
 			ps.setBoolean(8, is_active);
 
-			String mailId = user.getEmail();
+			String mailId = email;
+			
 			System.out.println(mailId);
 			int rs = ps.executeUpdate();
 			if (rs > 0) {
@@ -88,7 +100,7 @@ public class UserServiceImpl implements UserService {
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (e.getMessage().toUpperCase().contains("ORA-00001")) {
-				responseCode += " : " + "User With Id: " + user.getEmail() + " is already registered ";
+				responseCode += " : " + "User With Id: " + email + " is already registered ";
 			} else {
 				responseCode += " : " + e.getMessage();
 				System.out.println(responseCode);
@@ -213,40 +225,41 @@ public class UserServiceImpl implements UserService {
 		return result;
 	}
 
-//	@Override
-//	public User loginUser(String email, String password) {
-//		User u = new User();
-//		String result;
-//		String query = "select mailid,pword from customer where mailid=?";
-//		try {
-//			Connection con = dbconnection.getConnection();
-//			PreparedStatement ps = con.prepareStatement(query);
-//			ps.setString(1, email);
-//			ResultSet rs = ps.executeQuery();
-//			if (rs.next()) {
-//				u.setEmail(rs.getString("maildID"));
-//				u.setPassword(rs.getString("pword"));
-//			} else {
-//				throw new Exception("UserName/Email is not correct");
-//			}
-//			ps.close();
-//			String actualMail=u.getEmail();
-//			String actualPword=u.getPassword();
-//			if(actualMail.equals(email) && actualPword.equals(password)) {
-//				u=findByEmail(email);
-//				u.setFname(rs.getString("fname"));
-//				u.setLname(rs.getString("lname"));
-//				u.setAddress(rs.getString("addr"));
-//				u.setEmail(rs.getString("mailid"));
-//				u.setPhone_number(rs.getString("phno"));
-//			}
-//		} catch (Exception e) {
-//			// Log the exception details here instead of printStackTrace
-//			e.printStackTrace();
-//			result = "SQLException occurred: " + e.getMessage();
-//			System.out.println(result);
-//		}
-//		return u;
-//	}
+	@Override
+	public User loginUser(String email, String password) {
+		User u = new User();
+		String result;
+		String query = "select mailid,pword from customer where mailid=?";
+		try {
+			Connection con = dbconnection.getConnection();
+			PreparedStatement ps = con.prepareStatement(query);
+			ps.setString(1, email);
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				u.setEmail(rs.getString("MAILID"));
+				u.setPassword(rs.getString("PWORD"));
+			} else {
+				throw new Exception("UserName/Email is not correct");
+			}
+			ps.close();
+			String actualMail=u.getEmail();
+			String actualPword=u.getPassword();
+			if(actualMail.equals(email) && actualPword.equals(password)) {
+				u=findByEmail(email);
+				u.setFname(rs.getString("fname"));
+				u.setLname(rs.getString("lname"));
+				u.setAddress(rs.getString("addr"));
+				u.setPassword(rs.getString("pword"));
+				u.setEmail(rs.getString("mailid"));
+				u.setPhone_number(rs.getString("phno"));
+			}
+		} catch (Exception e) {
+			// Log the exception details here instead of printStackTrace
+			e.printStackTrace();
+			result = "SQLException occurred: " + e.getMessage();
+			System.out.println(result);
+		}
+		return u;
+	}
 
 }

@@ -6,7 +6,8 @@ public interface UserService {
 
 	public User findByEmail(String s);
 
-	public String registerUser(User user);
+	public String registerUser(String email, String password, String firstName, String lastName, String address,
+			String phoneNumber);
 
 	public User updateUser();
 
@@ -17,6 +18,6 @@ public interface UserService {
 	String updateUser(String email, String password, String firstName, String lastName, String address,
 			String phoneNumber);
 
-//	public User loginUser(String email,String password);
+	public User loginUser(String email,String password);
 
 }

@@ -48,8 +48,10 @@ public class UserController {
 	}
 
 	@PostMapping("/registerUser")
-	public ResponseEntity<String> registerUser(@RequestBody User user) {
-		String res = userservice.registerUser(user);
+	public ResponseEntity<String> registerUser(@RequestParam String email, @RequestParam String password,
+			@RequestParam String firstName, @RequestParam String lastName, @RequestParam String address,
+			@RequestParam String phoneNumber) {
+		String res = userservice.registerUser(email,password,firstName,lastName,address,phoneNumber);
 		return ResponseEntity.ok(res);
 	}
 
@@ -60,9 +62,9 @@ public class UserController {
 	}
 
 	@PutMapping("/validateOTP")
-	public ResponseEntity<String> validateOTP(@RequestBody User user) {
-		String email = user.getEmail();
-		String otp = user.getOtp();
+	public ResponseEntity<String> validateOTP(@RequestParam String email,@RequestParam String otp) {
+//		String email = user.getEmail();
+//		String otp = user.getOtp();
 		try {
 			String result = userservice.validateUser(email, otp);
 			return ResponseEntity.ok(result);
@@ -169,16 +171,16 @@ public class UserController {
 		return res;
 	}
 
-//	@PostMapping("/login")
-//	public ResponseEntity<User> login(@RequestBody Map<String, String> request) {
+	@PostMapping("/login")
+	public ResponseEntity<User> login(@RequestParam String email,@RequestParam String password) {
 //	    String email = request.get("email");
 //	    String password = request.get("password");
-//	    User u = userservice.loginUser(email, password);
-//	    if (u != null) {
-//	        return ResponseEntity.ok(u);
-//	    } else {
-//	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-//	    }
-//	}
+	    User u = userservice.loginUser(email, password);
+	    if (u != null) {
+	        return ResponseEntity.ok(u);
+	    } else {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+	    }
+	}
 
 }
