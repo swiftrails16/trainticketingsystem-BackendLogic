@@ -1,3 +1,9 @@
+# Use a Docker image that includes Docker CLI
+FROM docker:latest AS docker-cli
+
+# Remove the existing container if it exists
+RUN docker rm -f swiftrails-dev || true
+
 # Use Maven as the base image for building the application
 FROM maven:3.6.3-openjdk-17 AS builder
 
