@@ -1,6 +1,7 @@
 package com.swiftrails.SWIFTRAILS.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -26,6 +27,7 @@ public class EmailSenderService {
 	        helper.setTo(to);
 	        helper.setSubject(subject);
 	        helper.setText(text);
+	        
 
 	        javaMailSender.send(message);
 	    } catch (jakarta.mail.MessagingException e) {
@@ -34,5 +36,27 @@ public class EmailSenderService {
 		}
 
     }
+	    
+	    public void sendEmailWithAttachment(String to, String subject, String text, byte[] attachment) throws MessagingException {
+	    	 jakarta.mail.internet.MimeMessage message = javaMailSender.createMimeMessage();
+	    	 MimeMessageHelper helper;
+
+	        try {
+	        	helper = new MimeMessageHelper(message, true);
+				helper.setTo(to);
+				helper.setSubject(subject);
+				helper.setText(text);
+
+				ByteArrayResource resource = new ByteArrayResource(attachment);
+
+				helper.addAttachment("Invoice.pdf", resource);
+			} catch (jakarta.mail.MessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+	        javaMailSender.send(message);
+	    }
 
 }
+
