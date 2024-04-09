@@ -217,6 +217,9 @@ public class UserServiceImpl implements UserService {
 			} else {
 				result = "No user found with the provided email, or user could not be deleted.";
 			}
+		}catch (NullPointerException e) {
+			e.printStackTrace();
+			result = "NullPointerException occurred: " + e.getMessage();
 		} catch (SQLException e) {
 			// Log the exception details here instead of printStackTrace
 			e.printStackTrace();

@@ -61,7 +61,7 @@ public class UserController {
 		return u;
 	}
 
-	@PutMapping("/validateOTP")
+	@PostMapping("/validateOTP")
 	public ResponseEntity<String> validateOTP(@RequestParam String email,@RequestParam String otp) {
 //		String email = user.getEmail();
 //		String otp = user.getOtp();
