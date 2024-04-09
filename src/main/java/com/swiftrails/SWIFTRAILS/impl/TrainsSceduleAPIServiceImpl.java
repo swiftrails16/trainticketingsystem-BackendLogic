@@ -39,7 +39,7 @@ public class TrainsSceduleAPIServiceImpl implements TrainsSceduleAPIService {
 		// Create an HTTP request
 		HttpRequest request = HttpRequest.newBuilder().uri(URI.create(urlWithParams))
 				.header("content-type", "application/json")
-				.header("X-RapidAPI-Key", "d203ccc19emsh104f59f841167acp187bbajsnc646046aee4d")
+				.header("X-RapidAPI-Key", "2cb6940b2amsha2d410e58e50b3bp12e15djsn733a2e55e2ff")
 				.header("X-RapidAPI-Host", "irctc1.p.rapidapi.com").method("GET", HttpRequest.BodyPublishers.noBody())
 				.build();
 
