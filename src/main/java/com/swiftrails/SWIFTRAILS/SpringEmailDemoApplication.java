@@ -17,13 +17,13 @@ import javax.mail.MessagingException;
 @EnableAutoConfiguration
 //@ComponentScan(basePackages = {"com.swiftrails.SWIFTRAILS"})
 //@EnableJpaRepositories(basePackages="com.swiftrails.SWIFTRAILS.repositories")
-public class SpringEmailDemoApplication {
+public class SwiftrailsSpringBootApplication {
 
 //	@Autowired
 //	private EmailSenderService senderService;
 	
 	public static void main(String[] args) {
-		SpringApplication.run(SpringEmailDemoApplication.class, args);
+		SpringApplication.run(SwiftrailsSpringBootApplication.class, args);
 	}
 
 }
