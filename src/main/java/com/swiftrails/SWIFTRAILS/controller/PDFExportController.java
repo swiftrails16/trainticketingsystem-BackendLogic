@@ -28,7 +28,10 @@ public class PDFExportController {
                             @RequestParam double amount,
                             @RequestParam String name,
                             @RequestParam String trainName,
-                            @RequestParam String date) throws IOException {
+                            @RequestParam String date,
+                            @RequestParam String from_station,
+                            @RequestParam String to_station,
+                            @RequestParam String seat) throws IOException {
 
         response.setContentType("application/pdf");
 
@@ -40,7 +43,9 @@ public class PDFExportController {
         response.setHeader(headerKey, headerValue);
 
         // Call the PDFGeneratorService to generate the PDF with the provided parameters
-        byte[] pdfContent = pdfGeneratorService.export(mailId, cardNumber, cardExpiry, cardCVV, amount, name, trainName, date);
+        byte[] pdfContent = pdfGeneratorService.export(mailId, cardNumber,  cardExpiry,  cardCVV,  amount,
+                 name,  trainName,  date, seat, from_station,
+                 to_station);
 
         // Write the PDF content to the response output stream
         response.getOutputStream().write(pdfContent);
