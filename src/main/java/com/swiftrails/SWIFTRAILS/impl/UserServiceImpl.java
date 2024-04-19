@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
 	public String registerUser(String email,String password,String firstName,String lastName,String address,String phoneNumber) {
 		String responseCode = null;
 		String query = "INSERT INTO customer VALUES(?,?,?,?,?,?,?,?)";
-
+		String previousUser="select * from CustomerDetails where mailId=?";
 		try {
 			Connection con = dbconnection.getConnection();
 			PreparedStatement ps = con.prepareStatement(query);
@@ -68,16 +68,6 @@ public class UserServiceImpl implements UserService {
 			boolean is_active = false;
 
 			System.out.println("This is the mail ID: " + email);
-//			ps.setString(1, user.getEmail());
-//			ps.setString(2, user.getPassword());
-//			ps.setString(3, user.getFname());
-//			ps.setString(4, user.getLname());
-//			ps.setString(5, user.getAddress());
-//			ps.setString(6, user.getPhone_number());
-//			ps.setString(7, otp);
-//			ps.setBoolean(8, is_active);
-//
-//			String mailId = user.getEmail();
 			ps.setString(1, email);
 			ps.setString(2, password);
 			ps.setString(3, firstName);
@@ -95,9 +85,38 @@ public class UserServiceImpl implements UserService {
 				triggerMail(mailId, otp);
 				responseCode = "Sent an OTP to the given Mail ID";
 			}
-
+			
+			PreparedStatement ps1 = con.prepareStatement(previousUser);
+			ps1.setString(1,email);
+			ResultSet rs1=ps1.executeQuery();
+			if(rs1.next()) {
+				System.out.println("Previous User");
+			}
+			else {
+				String query2="INSERT INTO customerDetails VALUES(?,?,?,?,?,?)";
+				PreparedStatement ps2 = con.prepareStatement(query2);
+				ps2.setString(1, email);
+				ps2.setString(2, password);
+				ps2.setString(3, firstName);
+				ps2.setString(4, lastName);
+				ps2.setString(5, address);
+				ps2.setString(6,phoneNumber);
+				
+				int rs2=ps2.executeUpdate();	
+				ps2.close();
+			}
 			ps.close();
-		} catch (Exception e) {
+			ps1.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			if (e.getMessage().toUpperCase().contains("ORA-00001")) {
+				responseCode += " : " + "User With Id: " + email + " is already registered ";
+			} else {
+				responseCode += " : " + e.getMessage();
+				System.out.println(responseCode);
+			}
+		}catch(Exception e) {
 			e.printStackTrace();
 			if (e.getMessage().toUpperCase().contains("ORA-00001")) {
 				responseCode += " : " + "User With Id: " + email + " is already registered ";
@@ -205,6 +224,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public String deleteUser(String email) {
 		String result;
+//		String quuery1="DELETE FROM history WHERE MAILID=?";
 		String query = "DELETE FROM customer WHERE MAILID=?";
 		try {
 			Connection con = dbconnection.getConnection();
