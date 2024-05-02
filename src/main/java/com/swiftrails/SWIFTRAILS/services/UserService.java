@@ -19,5 +19,9 @@ public interface UserService {
 			String phoneNumber);
 
 	public User loginUser(String email,String password);
+	
+	public String calculateDiscount(String mailId,String promotionCode, int amount);
+	
+	public int displayLoyalty(String mailId);
 
 }
