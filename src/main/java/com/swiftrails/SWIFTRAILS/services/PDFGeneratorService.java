@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -35,8 +36,10 @@ public class PDFGeneratorService {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         
         String responseCode = null;
+        boolean isEligibleForDiscount=false;
 		String query = "INSERT INTO history VALUES(?,?,?,?,?,?,?)";
 		String query2= "INSERT INTO cardDetails VALUES(?,?,?,?,?)";
+//		String query3="INSERT INTO LoyaltyTable VALUES(?,?)";
 		String transID = UUID.randomUUID().toString();
 		String daySplit[]=date.split("/");
 		int year=Integer.parseInt(daySplit[2]);
@@ -72,6 +75,62 @@ public class PDFGeneratorService {
 				responseCode += " : " + e.getMessage();
 				System.out.println(responseCode);
 			}
+		}
+		try {
+			String checkUserLoyalty="select * from LoyaltyTable where mailId=?";
+			Connection con = dbconnection.getConnection();
+			PreparedStatement psLoyalty=con.prepareStatement(checkUserLoyalty);
+			
+			psLoyalty.setString(1, mailId);
+			
+			ResultSet rl= psLoyalty.executeQuery();
+			if(rl.next()) {
+				int prevloyaltyPoints= rl.getInt("loyaltyPoints");
+				
+				int currentPoints= (int)amount;
+				
+				int updatedLoyaltyPoints= currentPoints+prevloyaltyPoints;
+				
+				if(updatedLoyaltyPoints>=100) {
+					isEligibleForDiscount=true;
+				}
+				
+				String updateLoyalty="UPDATE LoyaltyTable SET LOYALTYPOINTS=? WHERE MAILID=?";
+				PreparedStatement updateLoyaltyPoints=con.prepareStatement(updateLoyalty);
+				updateLoyaltyPoints.setInt(1,updatedLoyaltyPoints);
+				updateLoyaltyPoints.setString(2,mailId);
+				
+				int resUpdate=updateLoyaltyPoints.executeUpdate();
+				
+			}else {
+				int currentPoints= (int)amount;
+				String Insertloyalty="Insert into loyaltytable values(?,?)";
+				PreparedStatement insertLoyaltyPoints=con.prepareStatement(Insertloyalty);
+				insertLoyaltyPoints.setString(1,mailId);
+				insertLoyaltyPoints.setInt(2,currentPoints);
+				
+				int resUpdate=insertLoyaltyPoints.executeUpdate();
+				if(resUpdate>0) {
+					System.out.println("New User: Created Loyalty points Successfully");
+				}else {
+					System.out.println("Problem inserting the records for the user");
+				}
+				
+			}
+			
+			
+			
+			
+			
+//			PreparedStatement ps3=con.prepareStatement(query3);
+//			int points=(int)amount;
+//			ps3.setString(1, mailId);
+//			ps3.setInt(2, points);
+//			
+//			int rs3 = ps3.executeUpdate();
+//			ps3.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
         try {
@@ -121,6 +180,11 @@ public class PDFGeneratorService {
             
             table.addCell("To Station");
             table.addCell(to_station);
+            
+            if(isEligibleForDiscount) {
+            	table.addCell("Coupon Code");
+                table.addCell("FIRST50");
+            }
 
             document.add(table);
             document.close();

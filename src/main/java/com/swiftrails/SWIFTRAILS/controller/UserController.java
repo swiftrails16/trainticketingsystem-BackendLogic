@@ -182,5 +182,17 @@ public class UserController {
 	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
 	    }
 	}
+	
+	@PostMapping("/promotions")
+	public String discount(@RequestParam String mailId,@RequestParam String promotionCode, @RequestParam int amount) {
+		String amountAfterDiscount=userservice.calculateDiscount(mailId,promotionCode,amount);
+		return amountAfterDiscount;
+	}
+	
+	@GetMapping("/getLoylaty")
+	public int getLoyalty(@RequestParam String mailId) {
+		int result=userservice.displayLoyalty(mailId);
+		return result;
+	}
 
 }
