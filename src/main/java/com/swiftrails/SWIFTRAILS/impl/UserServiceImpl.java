@@ -284,5 +284,81 @@ public class UserServiceImpl implements UserService {
 		}
 		return u;
 	}
+	
+	
+
+	@Override
+	public String calculateDiscount(String mailId,String promotionCode, int amount) {
+		String totalAmount;
+	    String query = "select discount from RESERVATION.PROMOTIONS where couponcode=?";
+	    String deductPoints="select loyaltyPoints from loyaltyTable where mailId=?";
+	    try {
+	        Connection con = dbconnection.getConnection();
+	        PreparedStatement ps = con.prepareStatement(query);
+	        ps.setString(1, promotionCode);
+	
+	        ResultSet rs = ps.executeQuery();
+	        if (rs.next()) {
+	            double discountPercent=rs.getInt("discount");
+	            double Discount= (discountPercent*amount)/100;
+	            double finalAmount= amount-Discount;
+	            
+	             totalAmount=String.valueOf(finalAmount);
+	             PreparedStatement ps2=con.prepareStatement(deductPoints);
+	             ps2.setString(1,mailId);
+	             
+	             ResultSet loy=ps2.executeQuery();
+	             if(loy.next()) {
+	            	 int points=loy.getInt("loyaltyPoints");
+	            	 int updatedLoyaltyPoints=points-100;
+	            	 
+	            	 String updateLoyaltyPoints="UPDATE LoyaltyTable SET LOYALTYPOINTS=? WHERE MAILID=?";
+	            	 PreparedStatement pso=con.prepareStatement(updateLoyaltyPoints);
+	            	 pso.setInt(1,updatedLoyaltyPoints);
+	            	 pso.setString(2,mailId);
+	            	 
+	            	 int fi=pso.executeUpdate();
+	            	 if(fi>0) {
+	            		 System.out.println("Successfully Updated Loyalty points");
+	            	 }
+	            	 else {
+	            		 System.out.println("Issue updating Loyalty Points");
+	            	 }
+	             }
+	        } else {
+	             totalAmount = "No such Coupon Available";
+	        }
+	        
+	        
+	    } catch (SQLException e) {
+	         totalAmount = "SQLException occurred: " + e.getMessage();
+	    }
+		return totalAmount;
+	}
+
+	@Override
+	public int displayLoyalty(String mailId) {
+		int result=0;
+		String query = "Select loyaltyPoints from loyaltyTable where mailid=?";
+		try {
+			Connection con = dbconnection.getConnection();
+			PreparedStatement ps = con.prepareStatement(query);
+			ps.setString(1, mailId);
+			ResultSet rs=ps.executeQuery();
+			
+			if (rs.next()) {
+				result = rs.getInt("loyaltyPoints");
+			} else {
+				result = 0;
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		} 
+		return result;
+	}
+	
+	
+	
+	
 
 }
