@@ -252,17 +252,21 @@ public class UserServiceImpl implements UserService {
 	public User loginUser(String email, String password) {
 		User u = new User();
 		String result;
-		String query = "select mailid,pword from customer where mailid=?";
+		String query = "select mailid,pword from customer where mailid=? AND PWORD=?";
 		try {
 			Connection con = dbconnection.getConnection();
 			PreparedStatement ps = con.prepareStatement(query);
 			ps.setString(1, email);
+	        ps.setString(2, password);
 			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				u.setEmail(rs.getString("MAILID"));
-				u.setPassword(rs.getString("PWORD"));
-			} else {
-				throw new Exception("UserName/Email is not correct");
+			try {
+				if (rs.next()) {
+					u.setEmail(rs.getString("MAILID"));
+					u.setPassword(rs.getString("PWORD"));
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
 			}
 			ps.close();
 			String actualMail=u.getEmail();
@@ -282,7 +286,11 @@ public class UserServiceImpl implements UserService {
 			result = "SQLException occurred: " + e.getMessage();
 			System.out.println(result);
 		}
-		return u;
+		if(u.getEmail() != null || u.getPassword() != null) {
+			return u;
+		} else {
+			return null;
+		}
 	}
 	
 	
@@ -290,8 +298,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public String calculateDiscount(String mailId,String promotionCode, int amount) {
 		String totalAmount;
-	    String query = "select discount from RESERVATION.PROMOTIONS where couponcode=?";
-	    String deductPoints="select loyaltyPoints from loyaltyTable where mailId=?";
+	    String query = "select discount from PROMOTIONS where couponcode=?";
+	    String deductPoints="select loyaltyPoints from LoyaltyTable where mailId=?";
 	    try {
 	        Connection con = dbconnection.getConnection();
 	        PreparedStatement ps = con.prepareStatement(query);
@@ -339,7 +347,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public int displayLoyalty(String mailId) {
 		int result=0;
-		String query = "Select loyaltyPoints from loyaltyTable where mailid=?";
+		String query = "Select loyaltyPoints from LoyaltyTable where mailid=?";
 		try {
 			Connection con = dbconnection.getConnection();
 			PreparedStatement ps = con.prepareStatement(query);
